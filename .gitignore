@@ -1,2 +1,28 @@
+# System & Editor Clutter
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Environment & Secrets
+.env
+*.env
+config.json
+*.key
+*.pem
+*.crt
 config.yml
+
+# Python & Virtual Environments (if using Python backends)
 __pycache__/
+*.pyc
+venv/
+.venv/
+
+# Node / Web Frontend (if using Node)
+node_modules/
+dist/
+
+# Logs & Temporary Files
+*.log
+/tmp/

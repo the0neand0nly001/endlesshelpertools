@@ -24,7 +24,7 @@ msg_ok() {
 # ---------------------------------------------------------
 
 APP_DIR="/opt/pve-scripts"
-REPO_URL="https://github.com/theoneandonly001/pve-scripts.git"
+REPO_URL="https://github.com/the0neand0nly001/endlesshelpertools.git"
 
 msg_info("Updating system packages...")
 apt update &>/dev/null && apt upgrade -y &>/dev/null
