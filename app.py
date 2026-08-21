@@ -72,7 +72,7 @@ TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proxmox VE Custom Scripts</title>
+    <title>Endless Helper Tools</title>
     <style>
         :root {
             --bg-base: #090d16;
@@ -131,7 +131,7 @@ TEMPLATE = """
     <nav>
         <div class="logo-area">
             <div class="logo-box">PVE</div>
-            <span>Custom Script Manager</span>
+            <span>Endless Helper Tools</span>
         </div>
         <div class="nav-links">
             <a href="/">Home</a>
@@ -152,7 +152,7 @@ TEMPLATE = """
 INDEX_PAGE = TEMPLATE.replace('{% block content %}{% endblock %}', """
     <div class="hero">
         <h1>Your homelab, <span>automated.</span></h1>
-        <p>Personal Proxmox VE LXC container deployment scripts, fully managed and self-hosted.</p>
+        <p>Personal Proxmox VE LXC container deployment scripts made by the Endlesshorizons Team.</p>
     </div>
 
     <div class="grid-container">
