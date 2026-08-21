@@ -18,11 +18,11 @@ if ! dpkg -s whiptail >/dev/null 2>&1; then
     apt-get update >/dev/null 2>&1 && apt-get install -y whiptail >/dev/null 2>&1
 fi
 
-# Mandatory Whiptail Prompt Setup (No default option)
-ADMIN_USER=$(whiptail --title "Admin Username" --inputbox "Enter a custom admin username:" 10 60 "admin" 3>&1 1>&2 2>&3)
+# Direct input prompts with pre-filled default values (No "defaults" yes/no box)
+ADMIN_USER=$(whiptail --title "Admin Username" --inputbox "Enter admin username:" 10 60 "admin" 3>&1 1>&2 2>&3)
 [ -z "$ADMIN_USER" ] && ADMIN_USER="admin"
 
-ADMIN_PASS=$(whiptail --title "Admin Password" --passwordbox "Enter a secure admin password:" 10 60 3>&1 1>&2 2>&3)
+ADMIN_PASS=$(whiptail --title "Admin Password" --passwordbox "Enter admin password:" 10 60 3>&1 1>&2 2>&3)
 [ -z "$ADMIN_PASS" ] && ADMIN_PASS="admin"
 
 DISCORD_WEBHOOK_URL=""
@@ -43,7 +43,7 @@ REPO_URL="https://github.com/the0neand0nly001/endlesshelpertools.git"
 echo "[EndlessTools] 📦 Updating system packages..."
 apt-get update &>/dev/null && apt-get upgrade -y &>/dev/null
 
-echo "[EndlessTools] 🐍 Installing required dependencies (Python, Git, Requests)..."
+echo "[EndlessTools] 🐍 Installing required dependencies (Python, Git)..."
 apt-get install -y python3 python3-pip python3-venv git python3-requests &>/dev/null
 
 echo "[EndlessTools] 📁 Setting up application directory..."
