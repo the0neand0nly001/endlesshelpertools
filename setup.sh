@@ -26,15 +26,15 @@ msg_ok() {
 APP_DIR="/opt/pve-scripts"
 REPO_URL="https://github.com/the0neand0nly001/endlesshelpertools.git"
 
-msg_info("Updating system packages...")
+msg_info "Updating system packages..."
 apt update &>/dev/null && apt upgrade -y &>/dev/null
-msg_ok("System packages updated")
+msg_ok "System packages updated"
 
-msg_info("Installing required dependencies (Python, Git)...")
+msg_info "Installing required dependencies (Python, Git)..."
 apt install -y python3 python3-pip python3-venv git &>/dev/null
-msg_ok("Dependencies installed")
+msg_ok "Dependencies installed"
 
-msg_info("Setting up application directory...")
+msg_info "Setting up application directory..."
 if [ ! -d "$APP_DIR" ]; then
     mkdir -p "$APP_DIR"
     git clone "$REPO_URL" "$APP_DIR" &>/dev/null
@@ -42,13 +42,13 @@ else
     cd "$APP_DIR"
     git pull &>/dev/null
 fi
-msg_ok("Application directory configured")
+msg_ok "Application directory configured"
 
-msg_info("Installing Python packages (Flask, PyYAML)...")
+msg_info "Installing Python packages (Flask, PyYAML)..."
 pip3 install --break-system-packages Flask PyYAML &>/dev/null
-msg_ok("Python packages installed")
+msg_ok "Python packages installed"
 
-msg_info("Configuring Systemd service...")
+msg_info "Configuring Systemd service..."
 SERVICE_FILE="/etc/systemd/system/pve-scripts.service"
 cat > "$SERVICE_FILE" <<EOF
 [Unit]
@@ -67,7 +67,7 @@ EOF
 systemctl daemon-reload &>/dev/null
 systemctl enable pve-scripts.service &>/dev/null
 systemctl restart pve-scripts.service &>/dev/null
-msg_ok("Systemd service started")
+msg_ok "Systemd service started"
 
 # Get the host's primary IP address cleanly
 IP_ADDR=$(hostname -I | awk '{print $1}')
