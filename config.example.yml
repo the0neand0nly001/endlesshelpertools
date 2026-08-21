@@ -16,3 +16,21 @@ scripts:
     hdd: "4 GB"
     user: "admin"
     credentialsNote: "None"
+
+ADMIN_PASSWORD_HASH: "pbkdf2:sha256:600000$g1kU7VzH$b09b537f5dbcc23db8b693bc2f50d603a11000bb705de55998f6834d8583c21a"
+ADMIN_USERNAME: admin
+scripts:
+- category: Reverse Proxy
+  cpu: 1 Core
+  credentialsNote: Default setup, Port 5000
+  description: "A lightweight web interface for Caddy.\r\nNote: The Container needs\
+    \ to be already made."
+  hdd: 4 GB
+  id: caddy-manager
+  installCmd: sudo bash -c "$(curl -sSL https://raw.githubusercontent.com/the0neand0nly001/caddymanager/stable/setup.sh)"
+  ram: 1024 MB
+  runsIn: LXC
+  tags: LXC,Proxy
+  title: Caddy Manager
+  user: admin
+  website: https://github.com/the0neand0nly001/caddymanager
