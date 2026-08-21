@@ -18,16 +18,16 @@ if ! dpkg -s whiptail >/dev/null 2>&1; then
     apt-get update >/dev/null 2>&1 && apt-get install -y whiptail >/dev/null 2>&1
 fi
 
-# Interactive Whiptail Prompt Setup
-if (whiptail --title "Endless Helper Tools Setup" --yesno "Would you like to use default settings (Username: admin)?" 10 60); then
-    ADMIN_USER="admin"
-    ADMIN_PASS="admin"
-else
-    ADMIN_USER=$(whiptail --title "Admin Username" --inputbox "Enter admin username:" 10 60 "admin" 3>&1 1>&2 2>&3)
-    [ -z "$ADMIN_USER" ] && ADMIN_USER="admin"
+# Mandatory Whiptail Prompt Setup (No default option)
+ADMIN_USER=$(whiptail --title "Admin Username" --inputbox "Enter a custom admin username:" 10 60 "admin" 3>&1 1>&2 2>&3)
+[ -z "$ADMIN_USER" ] && ADMIN_USER="admin"
 
-    ADMIN_PASS=$(whiptail --title "Admin Password" --passwordbox "Enter admin password:" 10 60 3>&1 1>&2 2>&3)
-    [ -z "$ADMIN_PASS" ] && ADMIN_PASS="admin"
+ADMIN_PASS=$(whiptail --title "Admin Password" --passwordbox "Enter a secure admin password:" 10 60 3>&1 1>&2 2>&3)
+[ -z "$ADMIN_PASS" ] && ADMIN_PASS="admin"
+
+DISCORD_WEBHOOK_URL=""
+if (whiptail --title "Discord Webhook Alert" --yesno "Would you like to link a Discord webhook for failed login alerts?" 10 60); then
+    DISCORD_WEBHOOK_URL=$(whiptail --title "Discord Webhook" --inputbox "Enter your Discord Webhook URL:" 10 60 3>&1 1>&2 2>&3)
 fi
 
 if !(whiptail --title "Ready to Install" --yesno "Proceed with installing Endless Helper Tools?" 10 60); then
@@ -43,8 +43,8 @@ REPO_URL="https://github.com/the0neand0nly001/endlesshelpertools.git"
 echo "[EndlessTools] 📦 Updating system packages..."
 apt-get update &>/dev/null && apt-get upgrade -y &>/dev/null
 
-echo "[EndlessTools] 🐍 Installing required dependencies (Python, Git)..."
-apt-get install -y python3 python3-pip python3-venv git &>/dev/null
+echo "[EndlessTools] 🐍 Installing required dependencies (Python, Git, Requests)..."
+apt-get install -y python3 python3-pip python3-venv git python3-requests &>/dev/null
 
 echo "[EndlessTools] 📁 Setting up application directory..."
 if [ ! -d "$APP_DIR" ]; then
@@ -55,10 +55,10 @@ else
     git pull &>/dev/null
 fi
 
-echo "[EndlessTools] 📦 Installing Python packages (Flask, PyYAML)..."
-pip3 install --break-system-packages Flask PyYAML &>/dev/null
+echo "[EndlessTools] 📦 Installing Python packages (Flask, PyYAML, Requests)..."
+pip3 install --break-system-packages Flask PyYAML requests &>/dev/null
 
-echo "[EndlessTools] ⚙️ Configuring admin credentials..."
+echo "[EndlessTools] ⚙️ Configuring admin credentials and security webhook..."
 cd "$APP_DIR"
 cat << 'PY_EOF' > make_config.py
 import sys
@@ -67,10 +67,12 @@ from werkzeug.security import generate_password_hash
 
 user = sys.argv[1]
 password = sys.argv[2]
+webhook = sys.argv[3] if len(sys.argv) > 3 else ""
 
 config = {
     'ADMIN_USERNAME': user,
     'ADMIN_PASSWORD_HASH': generate_password_hash(password),
+    'DISCORD_WEBHOOK_URL': webhook,
     'scripts': [
         {
             'id': 'caddy-manager',
@@ -94,7 +96,7 @@ with open('config.yml', 'w') as f:
     yaml.dump(config, f)
 PY_EOF
 
-python3 make_config.py "$ADMIN_USER" "$ADMIN_PASS"
+python3 make_config.py "$ADMIN_USER" "$ADMIN_PASS" "$DISCORD_WEBHOOK_URL"
 rm -f make_config.py
 
 echo "[EndlessTools] 🔌 Configuring systemd service..."

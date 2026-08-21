@@ -1,4 +1,6 @@
 import os
+import time
+import requests
 import yaml
 from flask import Flask, render_template_string, request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash
@@ -7,6 +9,13 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 CONFIG_FILE = 'config.yml'
+
+# In-memory tracking for failed login rate-limiting / webhook updating
+failed_login_tracker = {
+    'count': 0,
+    'last_attempt': 0,
+    'webhook_message_id': None
+}
 
 def load_config():
     if not os.path.exists(CONFIG_FILE):
@@ -19,6 +28,42 @@ def load_config():
 def save_config(data):
     with open(CONFIG_FILE, 'w') as f:
         yaml.dump(data, f)
+
+def send_discord_security_alert(failed_count, client_ip):
+    config = load_config()
+    webhook_url = config.get('DISCORD_WEBHOOK_URL')
+    if not webhook_url:
+        return
+
+    now = time.time()
+    # Reset count if it's been more than 10 minutes since the last failure
+    if now - failed_login_tracker['last_attempt'] > 600:
+        failed_login_tracker['count'] = 0
+        failed_login_tracker['webhook_message_id'] = None
+
+    failed_login_tracker['count'] = failed_count
+    failed_login_tracker['last_attempt'] = now
+
+    payload = {
+        "content": f"🚨 **Security Alert**: Detected multiple failed admin login attempts!\n- **Failed Count**: `{failed_login_tracker['count']}`\n- **Last Source IP**: `{client_ip}`"
+    }
+
+    try:
+        if failed_login_tracker['webhook_message_id']:
+            # Edit the existing message instead of sending a new one
+            edit_url = f"{webhook_url}/messages/{failed_login_tracker['webhook_message_id']}"
+            response = requests.patch(edit_url, json=payload, timeout=5)
+            if response.status_code != 200:
+                failed_login_tracker['webhook_message_id'] = None
+        
+        if not failed_login_tracker['webhook_message_id']:
+            # Send a new message and save its ID
+            response = requests.post(f"{webhook_url}?wait=true", json=payload, timeout=5)
+            if response.status_code in [200, 201]:
+                data = response.json()
+                failed_login_tracker['webhook_message_id'] = data.get('id')
+    except Exception as e:
+        print(f"Failed to send Discord webhook: {e}")
 
 # HTML Template with Public View, Modal, Admin Login, and Dashboard Management
 TEMPLATE = """
@@ -265,9 +310,14 @@ def index():
 def login():
     if request.method == 'POST':
         config = load_config()
+        client_ip = request.remote_addr or "Unknown IP"
         if request.form['username'] == config.get('ADMIN_USERNAME') and check_password_hash(config.get('ADMIN_PASSWORD_HASH'), request.form['password']):
             session['logged_in'] = True
             return redirect(url_for('admin_dashboard'))
+        
+        # Track failed attempt and trigger Discord security alert update
+        failed_login_tracker['count'] += 1
+        send_discord_security_alert(failed_login_tracker['count'], client_ip)
         flash('Invalid username or password')
     return render_template_string(LOGIN_PAGE)
 
@@ -348,4 +398,4 @@ def admin_delete(script_id):
     return redirect(url_for('admin_dashboard'))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=False)
