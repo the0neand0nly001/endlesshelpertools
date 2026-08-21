@@ -1,7 +1,7 @@
 import os
 import yaml
 from flask import Flask, render_template_string, request, redirect, url_for, session, flash
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -10,29 +10,9 @@ CONFIG_FILE = 'config.yml'
 
 def load_config():
     if not os.path.exists(CONFIG_FILE):
-        default_config = {
-            "ADMIN_USERNAME": "admin",
-            "ADMIN_PASSWORD_HASH": generate_password_hash("admin"),
-            "scripts": [
-                {
-                    "id": "caddy-manager",
-                    "title": "Caddy Manager",
-                    "category": "Reverse Proxy",
-                    "description": "A lightweight web interface for Caddy.",
-                    "tags": "LXC,Proxy",
-                    "website": "https://github.com/theoneandonly001/caddymanager",
-                    "installCmd": 'bash -c "$(wget -qLO - https://raw.githubusercontent.com/theoneandonly001/caddymanager/main/ct/caddy-manager.sh)"',
-                    "runsIn": "LXC",
-                    "cpu": "1 Core",
-                    "ram": "1024 MB",
-                    "hdd": "4 GB",
-                    "user": "admin",
-                    "credentialsNote": "Default setup"
-                }
-            ]
-        }
-        with open(CONFIG_FILE, 'w') as f:
-            yaml.dump(default_config, f)
+        raise FileNotFoundError(
+            "config.yml not found! Please ensure setup.sh has been run to configure admin credentials."
+        )
     with open(CONFIG_FILE, 'r') as f:
         return yaml.safe_load(f)
 
@@ -369,5 +349,3 @@ def admin_delete(script_id):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
-
-# v1
