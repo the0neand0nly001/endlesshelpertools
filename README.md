@@ -1,2 +1,2 @@
-# endlesshelpertools
-EndlessHorizons Helper Tools
+# pve-scripts
+Endless Horizons Helper Scripts
