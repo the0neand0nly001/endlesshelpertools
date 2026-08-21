@@ -81,13 +81,13 @@ config = {
             'description': 'A lightweight web interface for Caddy.',
             'tags': 'LXC,Proxy',
             'website': 'https://github.com/theoneandonly001/caddymanager',
-            'installCmd': 'bash -c "$(wget -qLO - https://raw.githubusercontent.com/theoneandonly001/caddymanager/main/ct/caddy-manager.sh)"',
+            'installCmd': 'bash -c "$(wget -qLO - https://raw.githubusercontent.com/theoneandonly001/caddymanager/stable/ct/caddy-manager.sh)"',
             'runsIn': 'LXC',
             'cpu': '1 Core',
             'ram': '1024 MB',
             'hdd': '4 GB',
             'user': 'admin',
-            'credentialsNote': 'Default setup'
+            'credentialsNote': 'Default setup, Port 5000'
         }
     ]
 }
